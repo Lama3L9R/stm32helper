@@ -1,0 +1,9 @@
+{
+  "name": "stm32helper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "Anti-996",
+  "dependencies": {
+    "shelljs.exec": "^1.1.8"
+  }
+}
