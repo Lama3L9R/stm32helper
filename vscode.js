@@ -3,10 +3,6 @@ const path = require('path')
 const exec = require("shelljs.exec")
 const { parseArgs } = require("./cli")
 
-const CPU_FINDER = /(?<=(CPU = ))\S*$/mg
-const FPU_FINDER = /(?<=(FPU = ))\S*$/mg
-const FLOAT_ABI_FINDER = /(?<=(FLOAT-ABI = ))\S*$/mg
-
 String.prototype._split = String.prototype.split
 String.prototype.split = function(separator, limit) {
     if (separator === undefined && limit === 0) return []
@@ -109,9 +105,9 @@ const main = (args) => {
 
     // find defines
 
-    const cpu = make.match(CPU_FINDER)
-    const fpu = make.match(FPU_FINDER)
-    const floatABI = make.match(FLOAT_ABI_FINDER)
+    const cpu = findMakefileVar(makelines, "CPU")
+    const fpu = findMakefileVar(makelines, "FPU")
+    const floatABI = make.match(makelines, "FLOAT-ABI")
     
     const defines = (exec(`arm-none-eabi-gcc ${cpu} -mthumb ${fpu ?? ""} ${floatABI ?? ""} -E -dM - < /dev/null | sort`, { async: false }).stdout + "")
         .split("\n")
