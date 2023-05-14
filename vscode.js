@@ -115,7 +115,7 @@ const main = (args) => {
 
     const cpu = findMakefileVar(makelines, "CPU")
     const fpu = findMakefileVar(makelines, "FPU")
-    const floatABI = make.match(makelines, "FLOAT-ABI")
+    const floatABI = findMakefileVar(makelines, "FLOAT-ABI")
     
     const defines = (exec(`arm-none-eabi-gcc ${cpu} -mthumb ${fpu ?? ""} ${floatABI ?? ""} -E -dM - < /dev/null | sort`, { async: false }).stdout + "")
         .split("\n")
