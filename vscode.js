@@ -3,6 +3,14 @@ const path = require('path')
 const exec = require("shelljs.exec")
 const { parseArgs } = require("./cli")
 
+/*
+
+Node.js String#split fix by Qumolama
+Published at https://t.me/lamaradio/113
+Opensource under Anti-996
+Copyright 2022-Present Qumolama
+
+*/
 String.prototype._split = String.prototype.split
 String.prototype.split = function(separator, limit) {
     if (separator === undefined && limit === 0) return []
