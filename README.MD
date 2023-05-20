@@ -12,10 +12,13 @@ As its name, this is a tool for stm32 development with vscode.
 
 # How to use
 
-## Generate `c_cpp_properties.json`
+## Pre-Requirements
 
 Install `nodejs` and `yarn`, then run
 `$ yarn install`
+
+
+## Generate `c_cpp_properties.json`
 
 Replace `/path/to/your/project` to your project directory path, then run
 `$ node index.js vscode /path/to/your/project >> /path/to/your/project/.vscode/c_cpp_properties.json`
@@ -23,3 +26,11 @@ Replace `/path/to/your/project` to your project directory path, then run
 ## Generate `C_SOURCES`
 
 **COMING SOON**
+
+## Download SVD
+
+`$node index.js svd -d <Your MCU Name> [-o <Output file>] [-s <SVD Index source>] [-u <SVD Download Source>]`
+
+For example
+
+My MCU is `STM32G071GBU6` so the command will be like: `node index.js svd -d STM32G071GB`
