@@ -18,10 +18,17 @@ Install `nodejs` and `yarn`, then run
 `$ yarn install`
 
 
-## Generate `c_cpp_properties.json`
+## Setup JLink workspace
 
-Replace `/path/to/your/project` to your project directory path, then run
-`$ node index.js vscode /path/to/your/project >> /path/to/your/project/.vscode/c_cpp_properties.json`
+**Good news! From now on no more stdout redirect is needed! You can generate `c_cpp_properties.json`, Cortex Debug profile and build tasks in one step!!**
+```
+$ node index.js vscode /path/to/your/project --jlink-all
+```
+
+Although most of the steps are full automatic now but you still need to set `cortex-debug.JLinkGDBServerPath` and `cortex-debug.gdbPath` in `settings.json` manully
+
+~~Replace `/path/to/your/project` to your project directory path, then run~~
+~~`$ node index.js vscode /path/to/your/project >> /path/to/your/project/.vscode/c_cpp_properties.json`~~
 
 ## Generate `C_SOURCES`
 
