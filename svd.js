@@ -3,7 +3,7 @@ const fs = require('fs')
 const { parseArgs } = require('./cli')
 
 const SVD_INDEX = "https://raw.githubusercontent.com/posborne/cmsis-svd/master/data/STMicro/Contents.txt"
-
+const SVD_SOURCE = "https://raw.githubusercontent.com/posborne/cmsis-svd/master/data/STMicro/"
 
 const main = async (argsRaw) => {
     const args = parseArgs(argsRaw)
@@ -21,7 +21,7 @@ const main = async (argsRaw) => {
         const devices = i.split(",").map(it => it.trim())
         if (devices.some(it => it.startsWith(targetDevice))) {
             console.log(`Downloading ${devices[devices.length - 1]}...`);
-            fs.writeFileSync(output ?? devices[devices.length - 1], (await axios("https://raw.githubusercontent.com/posborne/cmsis-svd/master/data/STMicro/" + devices[devices.length - 1])).data)
+            fs.writeFileSync(output ?? devices[devices.length - 1], (await axios(args.get("-u", "--svd-source") ?? SVD_SOURCE + devices[devices.length - 1])).data)
             return console.log(`Download Complete!`)
             
         }
