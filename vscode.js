@@ -2,38 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const exec = require("shelljs.exec")
 const { parseArgs } = require("./cli")
-
-/*
-
-Node.js String#split fix by Qumolama
-Published at https://t.me/lamaradio/113
-Opensource under Anti-996
-Copyright 2022-Present Qumolama
-
-*/
-String.prototype._split = String.prototype.split
-String.prototype.split = function(separator, limit) {
-    if (separator === undefined && limit === 0) return []
-
-    if(limit === undefined) {
-        return String.prototype._split.call(this, separator, limit)
-    }
-
-    const arr = []
-    let lastBegin = -1
-    for(let i = 0; i < limit - 1; i++) {
-        const end = String.prototype.indexOf.call(this, separator, ++lastBegin)
-        if(end == -1) {
-            arr.push(undefined)
-            continue
-        }
-        arr.push(String.prototype.substring.call(this, lastBegin, end))
-        lastBegin = end
-    }
-    arr.push(String.prototype.substring.call(this, ++lastBegin))
-
-    return arr
-}
+const downloadSVD = require("./svd")
+const ioc = require("./ioc")
 
 function readFile(file, errorMessage) { 
     if (!fs.existsSync(file)) {
@@ -90,11 +60,76 @@ function regexStartsWith(str, regex) {
     return str.indexOf(str.match(regex)) === 0
 }
 
-const main = (args) => {
-    const { configs, namelessArgs } = parseArgs(args)
+function createCortexDebugTemplate(mode, cpuFreq, device, execPath, server) {
+    return {
+        "name": "JLink " + mode === 'attach' ? "Attach" : "Debug",
+        "cwd": "${workspaceFolder}",
+        "executable": execPath,
+        "request": mode === 'attach'? mode : "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": server,
+        "device": device,
+        "interface": "swd",
+        "showDevDebugOutput": "raw",
+        "svdFile": `${"${workspaceFolder}"}/${device}.svd`,
+        "preLaunchTask": "Build",
+        "runToMain": mode === 'attach' ? undefined : true,
+        "swoConfig":
+        {
+            "enabled": true,
+            "cpuFrequency": cpuFreq,
+            "swoFrequency": 4000000,
+            "source": "probe",
+            "decoders":
+            [
+                {
+                    "label": "ITM port 0 output",
+                    "type": "console",
+                    "port": 0,
+                    "showOnStartup": true,
+                    "encoding": "ascii"
+                }
+            ]
+        }
+    }
+}
 
-    const projectRoot = namelessArgs[0]
 
+
+const main = (argsRaw) => {
+    const args = parseArgs(argsRaw)
+
+    const projectRoot = args.nameless(0)
+
+    const generates = [genCProfile]
+
+    if (args.option("c", "no-cprofile")) {
+        generates.pop()
+    }
+
+    if (args.option("j", "jlink-cortex-debug")) {
+        generates.push(genJLinkCortexDebugProfile)
+    }
+
+    if (args.option("l", "launch-profile")) {
+        generates.push(genBuildProfile)
+    }
+
+    if (args.option("d", "download-svd")) {
+        generates.push(downloadProjectSVD)
+    }
+
+    if (args.option(null, "jlink-all")) {
+        generates.push(genBuildProfile)
+        generates.push(genJLinkCortexDebugProfile)
+        generates.push(downloadProjectSVD)
+    }
+
+    generates.forEach(it => it(args, projectRoot))
+}
+
+const genCProfile = (args, projectRoot) => {
     if (!projectRoot) {
         console.log("Create a C/C++ profile for vscode")
         console.log(`Usage: node ${process.argv[1]} <project root dir>`)
@@ -132,7 +167,7 @@ const main = (args) => {
     
     // find gcc headers
 
-    const defaultPath = configs["gcc"] ?? "/usr/lib/gcc/arm-none-eabi"
+    const defaultPath = args.get("g", "gcc") ?? "/usr/lib/gcc/arm-none-eabi"
     if (!fs.existsSync(defaultPath)) {
         console.log("default path for arm-none-eabi not found! please specifiy with --gcc <path/to/gcc/arm-none-eabi>")
         process.exit(1)
@@ -170,8 +205,82 @@ const main = (args) => {
             }
         ]
     }
-
-    console.log(JSON.stringify(vscodeConfig, null, 4))
+    
+    if (args.option("p", "print")) {
+        console.log(JSON.stringify(vscodeConfig, null, 4))
+    } else {
+        fs.writeFileSync(args.get("o", "output") ?? path.resolve(projectRoot, ".vscode/c_cpp_properties.json"), JSON.stringify(vscodeConfig, null, 4))
+    }
 }
+
+const genJLinkCortexDebugProfile = (args, projectRoot) => {
+    const iocFile = new ioc(readFile(path.resolve(projectRoot, fs.readdirSync(projectRoot).find(it => it.endsWith(".ioc"))), "No ioc file was found! Abort! Make sure you have a STM32CubeMX generated project at project root!"))
+    const make = readFile(path.resolve(projectRoot, "Makefile"), "No 'Makefile' is detected! Abort!").split("\n")
+    
+    const print = args.option("p", "print")
+
+    const deviceName = iocFile.get("Mcu.CPN").trim().slice(0, -2)
+    const cpuFreq = parseInt(iocFile.get("RCC.SYSCLKFreq_VALUE").trim())
+
+    const target = findMakefileVar(make, "TARGET").trim()
+    const buildDir = findMakefileVar(make, "BUILD_DIR").trim()
+
+    const debugProfile = createCortexDebugTemplate('debug', cpuFreq, deviceName, `./${buildDir}/${target}.elf`, 'jlink')
+    const attachProfile = createCortexDebugTemplate('attach', cpuFreq, deviceName, `./${buildDir}/${target}.elf`, 'jlink')
+
+    if (print) {
+        console.log(JSON.stringify({
+            version: "0.2.0",
+            configurations: [debugProfile, attachProfile]
+        }, null, 4))
+    } else {
+        fs.writeFileSync(args.get("o", "output") ?? path.resolve(projectRoot, ".vscode", "launch.json"), JSON.stringify({
+            version: "0.2.0",
+            configurations: [debugProfile, attachProfile]
+        }, null, 4))
+    }
+}
+
+const downloadProjectSVD = (args, projectRoot) => {
+    const iocFile = new ioc(readFile(path.resolve(projectRoot, fs.readdirSync(projectRoot).find(it => it.endsWith(".ioc"))), "No ioc file was found! Abort! Make sure you have a STM32CubeMX generated project at project root!"))
+    const deviceName = iocFile.get("Mcu.CPN").trim().slice(0, -2)
+
+    if (args.option("p", "print")) {
+        downloadSVD(["-d", deviceName, "-o", path.resolve(projectRoot, deviceName + ".svd"), "-q", "-p"])
+    } else {
+        downloadSVD(["-d", deviceName, "-o", path.resolve(projectRoot, deviceName + ".svd")])
+    }
+}
+
+const genBuildProfile = (args, projectRoot) => {
+    const print = args.option("p", "print")
+
+    const config = {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build",
+                "command": "make",
+                "type": "shell",
+                "args": ["all", "-j8"],
+                "group": "build"
+            },
+            {
+                "label": "Clean",
+                "command": "make",
+                "type": "shell",
+                "args": ["clean", "-j8"],
+                "group": "build"
+            }
+        ]
+    }
+
+    if (print) {
+        console.log(JSON.stringify(config, null, 4))
+    } else {
+        fs.writeFileSync(path.resolve(projectRoot, ".vscode/tasks.json"), JSON.stringify(config, null, 4))
+    }
+}
+
 
 module.exports = main

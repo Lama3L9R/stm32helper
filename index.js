@@ -1,3 +1,5 @@
+require("./split")
+
 const functions = {
     'vscode': require('./vscode'),
     'svd': require('./svd')
