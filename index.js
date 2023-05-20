@@ -1,5 +1,6 @@
 const functions = {
-    'vscode': require('./vscode')
+    'vscode': require('./vscode'),
+    'svd': require('./svd')
 }
 
 const command = process.argv[2]
@@ -13,8 +14,9 @@ if (!command) {
     process.exit(0)
 }
 
-if (command in functions) {
-    functions[command](remaining)
-} else {
+if (!(command in functions)) {
     console.log("No such subcommand")
+    process.exit(1)
 }
+
+(async()=>await functions[command](remaining))()

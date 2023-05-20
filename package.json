@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "Anti-996",
   "dependencies": {
+    "axios": "^1.4.0",
     "shelljs.exec": "^1.1.8"
   }
 }
