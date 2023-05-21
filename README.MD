@@ -38,7 +38,7 @@ Although most of the steps are full automatic now but you still need to set `cor
 
 ## Download SVD
 
-`$node index.js svd -d <Your MCU Name> [-o <Output file>] [-s <SVD Index source>] [-u <SVD Download Source>]`
+`$ stm32helper svd -d <Your MCU Name> [-o <Output file>] [-s <SVD Index source>] [-u <SVD Download Source>]`
 
 For example
 
