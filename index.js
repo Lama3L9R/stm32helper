@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 require("./split")
 
 const functions = {
