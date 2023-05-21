@@ -15,14 +15,16 @@ As its name, this is a tool for stm32 development with vscode.
 ## Pre-Requirements
 
 Install `nodejs` and `yarn`, then run
-`$ yarn install`
+`$ yarn install && npm install -g .`
 
 
 ## Setup JLink workspace
 
 **Good news! From now on no more stdout redirect is needed! You can generate `c_cpp_properties.json`, Cortex Debug profile and build tasks in one step!!**
+
+**Good news x2 ! From now on you can install this script globally so you can access this script at anywhere!**
 ```
-$ node index.js vscode /path/to/your/project --jlink-all
+$ stm32helper vscode /path/to/your/project --jlink-all
 ```
 
 Although most of the steps are full automatic now but you still need to set `cortex-debug.JLinkGDBServerPath` and `cortex-debug.gdbPath` in `settings.json` manully
