@@ -102,6 +102,14 @@ const main = (argsRaw) => {
 
     const projectRoot = args.nameless(0)
 
+    if (!fs.existsSync(projectRoot)) {
+        return console.log("Project root does not exist! Abort!")
+    }
+
+    if (!fs.existsSync(path.resolve(projectRoot, ".vscode"))) {
+        fs.mkdirSync(path.resolve(projectRoot, ".vscode"))
+    }
+
     const generates = [genCProfile]
 
     if (args.option("c", "no-cprofile")) {
