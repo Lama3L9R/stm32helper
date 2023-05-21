@@ -8,7 +8,7 @@ As its name, this is a tool for stm32 development with vscode.
 # Features
 
 1. [x] Generate `c_cpp_properties.json`
-2. [ ] WIP: Generate the value of Makefile 'C_SOURCES'
+2. [x] WGenerate the value of Makefile 'C_SOURCES'
 
 # How to use
 
@@ -34,7 +34,47 @@ Although most of the steps are full automatic now but you still need to set `cor
 
 ## Generate `C_SOURCES`
 
-**COMING SOON**
+You have to edit your Makefile first!
+
+Add this line below `C_SOURCES`
+
+```
+C_SOURCES += $(shell stm32helper searchc .) # Add all user source code
+```
+
+And you will get something like this:
+
+```
+######################################
+# source
+######################################
+# C sources
+C_SOURCES =  \
+Core/Src/main.c \
+Core/Src/stm32g0xx_it.c \
+Core/Src/stm32g0xx_hal_msp.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_i2c_ex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_dma_ex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_exti.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.c \
+Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.c \
+Core/Src/system_stm32g0xx.c
+
+C_SOURCES += $(shell stm32helper searchc .) # Add all user source code
+```
 
 ## Download SVD
 

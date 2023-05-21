@@ -1,6 +1,6 @@
 const axios = require('axios')
 const fs = require('fs')
-const { parseArgs } = require('./cli')
+const { parseArgs } = require('./utils/cli')
 
 const SVD_INDEX = "https://raw.githubusercontent.com/posborne/cmsis-svd/master/data/STMicro/Contents.txt"
 const SVD_SOURCE = "https://raw.githubusercontent.com/posborne/cmsis-svd/master/data/STMicro/"

@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 function chunkString(str, size) {
     const numChunks = Math.ceil(str.length / size)
     const chunks = new Array(numChunks)
@@ -53,4 +55,13 @@ function parseArgs(args) {
     } }
 }
 
-module.exports = { parseArgs }
+function readFile(file, errorMessage) { 
+    if (!fs.existsSync(file)) {
+        console.log(errorMessage)
+        process.exit(1)
+    }
+
+    return fs.readFileSync(file).toString('utf8')
+}
+
+module.exports = { parseArgs, readFile }

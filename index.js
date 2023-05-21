@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-require("./split")
+require("./utils/strings")
 
 const functions = {
     'vscode': require('./vscode'),
-    'svd': require('./svd')
+    'svd': require('./svd'),
+    'searchc': require('./searchc')
 }
 
 const command = process.argv[2]

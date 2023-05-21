@@ -29,3 +29,10 @@ String.prototype.split = function(separator, limit) {
 
     return arr
 }
+
+
+function regexStartsWith(str, regex) {
+    return str.indexOf(str.match(regex)) === 0
+}
+
+module.exports = { regexStartsWith }
