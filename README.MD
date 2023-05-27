@@ -2,13 +2,14 @@
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
-As its name, this is a tool for stm32 development with vscode.
+As its name, this is a tool for stm32 development with vscode and WSL.
 ---
 
 # Features
 
 1. [x] Generate `c_cpp_properties.json`
 2. [x] WGenerate the value of Makefile 'C_SOURCES'
+3. [ ] Setup workspace in `Windows`
 
 # How to use
 
@@ -83,3 +84,21 @@ C_SOURCES += $(shell stm32helper searchc .) # Add all user source code
 For example
 
 My MCU is `STM32G071GBU6` so the command will be like: `node index.js svd -d STM32G071GB`
+
+
+## Using in Windows
+
+Things are a bit complicated in Windows so the easiest way is to use it in WSL (run `code` command in WSL). However, It is still possible. 
+
+Also please checkout this issue: https://github.com/microsoft/vscode-cpptools/issues/11018
+
+1. Create some batch file like these:
+```
+@echo off
+wsl arm-none-eabi-gcc %*
+```
+2. Copy out `ALL` system headers (something like: `/usr/arm-none-eabi/include`)
+3. Set `C_Cpp.default.systemIncludePath` to where you've copied out
+4. Change `compilerPath` to your batch file
+
+Not going to say too much about this method since its a sh1t. After C++ extension fixed that bug I'll make this whole process full automatic
